@@ -1,5 +1,6 @@
 import os
 import time
+import pickle
 import undetected_chromedriver as uc
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -123,6 +124,23 @@ class InstaBot:
         # Wait for the login process to complete (you may need to adjust the delay based on your internet speed)
         time.sleep(8)  # Wait for 5 seconds (adjust as needed)
         
+        #cookies
+        pickle.dump(self.driver.get_cookies(), open(f"{self.USER.login} cookies", "wb"))
+        time.sleep(3)
+    
+    
+    def load_accaunt(self):
+        
+        self.driver.get("https://www.instagram.com/")
+        time.sleep(5)
+        
+        for cookie in pickle.load(open(f"{self.USER.login} cookies", 'rb')):
+            self.driver.add_cookie(cookie)
+        
+        
+        time.sleep(5)
+        self.driver.refresh()
+        time.sleep(15)
 
 
 
@@ -130,9 +148,9 @@ class InstaBot:
 if __name__ == '__main__':
     bot = InstaBot(littlleaurora_reels)
     print('d')
-    bot.login()
-    time.sleep(30)
-    
+    # bot.login()
+    bot.load_accaunt()
+
     self.driver.close()
     self.driver.quit()
 
