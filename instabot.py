@@ -1,14 +1,24 @@
-from time import sleep
+import os
+import time
+import undetected_chromedriver as uc
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-import undetected_chromedriver as uc
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
-import os
 from selenium_stealth import stealth
-from config import PROXY_HOST, PROXY_PASS, PROXY_PORT, PROXY_USER
+from config import littlleaurora_reels
+
+
+
+
 
 class InstaBot:
-    def __init__(self):
+    def __init__(self, user):
+        
+        self.USER = user
         options = uc.ChromeOptions()
         PROXY_FOLDER = os.path.join('extension', 'proxy_folder')
         
@@ -62,7 +72,11 @@ class InstaBot:
                     {urls: ["<all_urls>"]},
                     ['blocking']
         );
-        """ % (PROXY_HOST, PROXY_PORT, PROXY_USER, PROXY_PASS)
+        """ % (self.USER.proxy['PROXY_HOST'],
+               self.USER.proxy['PROXY_PORT'],
+               self.USER.proxy['PROXY_USER'],
+               self.USER.proxy['PROXY_PASS'])
+        
         with open(f"{PROXY_FOLDER}/manifest.json","w") as f:
             f.write(manifest_json)
         with open(f"{PROXY_FOLDER}/background.js","w") as f:
@@ -72,10 +86,12 @@ class InstaBot:
         
         
         options.add_argument('--disable-blink-features=AutomationControlled')
+
+        
         self.driver = uc.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
         stealth(driver=self.driver,
-                    user_agent='Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    user_agent=self.USER.user_agent,
                     languages=["en-EN", "en"],
                     vendor="Google Inc.",
                     platform="Win32",
@@ -84,17 +100,34 @@ class InstaBot:
                     fix_hairline=True,
                     run_on_insecure_origins=True,
                     )
+        self.driver.set_window_size(700, 700)
 
 
-    def main(self):
-        self.driver.get('https://www.instagram.com/')
-        sleep(500)
+    def login(self):
+        # Open Instagram
+        self.driver.get("https://www.instagram.com/")
+        # Wait for the login elements to become available
+        wait = WebDriverWait(self.driver, 10)
+        email_field = wait.until(EC.presence_of_element_located((By.NAME, "username")))
+        password_field = wait.until(EC.presence_of_element_located((By.NAME, "password")))
+        # Find the login elements and enter email and password
+        # email_field.send_keys(self.USER.login)
+        # password_field.send_keys(self.USER.password)
+
+        # Submit the login form
+        # password_field.send_keys(Keys.RETURN)
+
+        # Wait for the login process to complete (you may need to adjust the delay based on your internet speed)
+        time.sleep(5)  # Wait for 5 seconds (adjust as needed)
+        
+        time.sleep(30)
         self.driver.close()
         self.driver.quit()
 
 
-bot = InstaBot()
+
+
 if __name__ == '__main__':
-    print('d')
-    bot.main()
+    bot = InstaBot(littlleaurora_reels)
+    bot.login()
 
