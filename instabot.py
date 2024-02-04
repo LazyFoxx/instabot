@@ -17,10 +17,12 @@ from config import littlleaurora_reels
 
 
 class InstaBot:
-    def __init__(self, user):
+    def __init__(self, user, headless=False):
         
         self.USER = user
         options = uc.ChromeOptions()
+        options.headless = headless
+        options.page_load_strategy = 'eager'
         
         if self.USER.proxy != None:
             
@@ -124,33 +126,109 @@ class InstaBot:
         # Wait for the login process to complete (you may need to adjust the delay based on your internet speed)
         time.sleep(8)  # Wait for 5 seconds (adjust as needed)
         
+        self.driver.get(f"https://www.instagram.com/{self.USER.login}/")
+        time.sleep(2)
         #cookies
-        pickle.dump(self.driver.get_cookies(), open(f"{self.USER.login} cookies", "wb"))
-        time.sleep(3)
+        pickle.dump(self.driver.get_cookies(), open(f"{self.USER.login}_cookies", "wb"))
+        
+        print(f'{self.USER.login} cookies saved. input complete')
+        time.sleep(4)
     
     
     def load_accaunt(self):
+        wait = WebDriverWait(self.driver, 10)
+        try:
         
-        self.driver.get("https://www.instagram.com/")
-        time.sleep(5)
+            self.driver.get("https://www.instagram.com/")
+            try:
+                for cookie in pickle.load(open(f"{self.USER.login}_cookies", 'rb')):
+                    self.driver.add_cookie(cookie)
+                print(f'{littlleaurora_reels.login} COOKIE LOADED')
+                
+                # self.driver.get("https://www.instagram.com/")
+                time.sleep(5)
+                
+                self.driver.get(f"https://www.instagram.com/{self.USER.login}/")
+                time.sleep(40)
+
+            except Exception as ex:
+                print(ex)
+                self.login()
+
+
+            
+            
+            print(f'{self.USER.login} login is completed')
+            time.sleep(3)
+        except Exception as ex:
+            print(ex)
+            
+    def like_by_photo(self, link):
         
-        for cookie in pickle.load(open(f"{self.USER.login} cookies", 'rb')):
-            self.driver.add_cookie(cookie)
+        wait = WebDriverWait(self.driver, 10)
+        self.driver.get(f"{link}")
+        time.sleep(10)
+
+        try:
+            liinks = self.driver.find_elements(By.TAG_NAME, 'a')
+            link_liked_by = ''
+            for item in liinks:
+                if 'liked_by' in item.get_attribute('href'):
+                    link_liked_by = item.get_attribute('href')
+            
+            time.sleep(1)
+            self.driver.get(f"{link_liked_by}")
+            
+            
+            liinks = self.driver.find_elements(By.TAG_NAME, 'a')
+            
+            links_list = []
+            for item in liinks:
+                links_list.append(item.get_attribute('href'))
+            
+            links_accounts_for_liking = []
+            for i in range(len(links_list) - 1):
+                if links_list[i] == links_list[i+1] and links_list[i] not in links_accounts_for_liking:
+                    links_accounts_for_liking.append(links_list[i])
+            
+            print(links_accounts_for_liking[2:])
+            
+            
+            
+
+            time.sleep(3)
+
+
+            print(f'{littlleaurora_reels.login} liking succsessful')
+        except Exception as ex:
+            print(ex)
         
         
-        time.sleep(5)
-        self.driver.refresh()
-        time.sleep(15)
+
+        
+
+    def close(self):
+
+        pickle.dump(self.driver.get_cookies(), open(f"{self.USER.login}_cookies", "wb"))
+        print(f'{littlleaurora_reels.login} COOKIE SAVED')
+        time.sleep(2)
+        self.driver.close
+        self.driver.quit
 
 
 
 
 if __name__ == '__main__':
-    bot = InstaBot(littlleaurora_reels)
-    print('d')
+    bot = InstaBot(user=littlleaurora_reels, headless=False)
+    print(f'{littlleaurora_reels.login} start')
     # bot.login()
     bot.load_accaunt()
+    bot.like_by_photo('https://www.instagram.com/p/C25vb9uIH2F/?img_index=1')
+    bot.close()
+    
+    
+    
+    time.sleep(20)
+    # bot.close()
 
-    self.driver.close()
-    self.driver.quit()
 
