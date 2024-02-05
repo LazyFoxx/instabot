@@ -1,6 +1,8 @@
 import os
 import time
 import pickle
+import datetime
+from random import randint as rn
 import undetected_chromedriver as uc
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -23,6 +25,8 @@ class InstaBot:
         options = uc.ChromeOptions()
         options.headless = headless
         options.page_load_strategy = 'eager'
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
         
         if self.USER.proxy != None:
             
@@ -131,7 +135,7 @@ class InstaBot:
         #cookies
         pickle.dump(self.driver.get_cookies(), open(f"{self.USER.login}_cookies", "wb"))
         
-        print(f'{self.USER.login} cookies saved. input complete')
+        print(f'{self.USER.login} - cookies saved. input completed')
         time.sleep(4)
     
     
@@ -143,14 +147,19 @@ class InstaBot:
             try:
                 for cookie in pickle.load(open(f"{self.USER.login}_cookies", 'rb')):
                     self.driver.add_cookie(cookie)
-                print(f'{littlleaurora_reels.login} COOKIE LOADED')
+                print(f'{littlleaurora_reels.login} - COOKIE LOADED')
                 
                 # self.driver.get("https://www.instagram.com/")
                 time.sleep(5)
                 
                 self.driver.get(f"https://www.instagram.com/{self.USER.login}/")
-                time.sleep(40)
-
+                time.sleep(20)
+                test_editprofil = False
+                # test_editprofil = self.driver.find_element(By.CLASS_NAME, 'x9f619 xjbqb8w x78zum5 x168nmei x13lgxp2 x5pf9jr xo71vjh x1n2onr6 x1plvlek xryxfnj x1iyjqo2 x2lwn1j xeuugli xdt5ytf xqjyukv x1qjc9v5 x1oa3qoh x1nhvcw1')
+                
+                if test_editprofil:
+                    print(f'{self.USER.login} - login is completed___')
+                
             except Exception as ex:
                 print(ex)
                 self.login()
@@ -158,7 +167,7 @@ class InstaBot:
 
             
             
-            print(f'{self.USER.login} login is completed')
+            print(f'{self.USER.login} - login is completed')
             time.sleep(3)
         except Exception as ex:
             print(ex)
@@ -168,17 +177,21 @@ class InstaBot:
         wait = WebDriverWait(self.driver, 10)
         self.driver.get(f"{link}")
         time.sleep(10)
-
-        try:
+        
+        def link_liked_by():
+        
             liinks = self.driver.find_elements(By.TAG_NAME, 'a')
             link_liked_by = ''
             for item in liinks:
                 if 'liked_by' in item.get_attribute('href'):
                     link_liked_by = item.get_attribute('href')
             
-            time.sleep(1)
-            self.driver.get(f"{link_liked_by}")
-            
+            return link_liked_by
+        
+        def get_user_links():
+        
+            self.driver.get(f"{link_liked_by()}")
+            time.sleep(10)
             
             liinks = self.driver.find_elements(By.TAG_NAME, 'a')
             
@@ -187,30 +200,93 @@ class InstaBot:
                 links_list.append(item.get_attribute('href'))
             
             links_accounts_for_liking = []
-            for i in range(len(links_list) - 1):
+            for i in range(6, len(links_list) - 1):
                 if links_list[i] == links_list[i+1] and links_list[i] not in links_accounts_for_liking:
-                    links_accounts_for_liking.append(links_list[i])
-            
-            print(links_accounts_for_liking[2:])
-            
-            
-            
+                    if 'liked_by' not in links_list[i] and f'{self.USER.login}' not in links_list[i]: 
+                        links_accounts_for_liking.append(links_list[i])
 
-            time.sleep(3)
+            print(*links_accounts_for_liking[:], sep='\n')
+            print(f'\n{self.USER.login} - all find accounts for liking - {len(links_accounts_for_liking)}')
+            return links_accounts_for_liking[3:]
+        
+        def liking_for_list(user_links):
+            
+            
+            print(f'\n{self.USER.login} - start liking!')
+            
+            
+            all_users = len(user_links)
+            like_users = 0
+            empty_users = 0
+            
+            for user in user_links:
+                self.driver.get(f'{user}')
+                time.sleep(11)
+                
+                liinks = self.driver.find_elements(By.TAG_NAME, 'a')        
+                try:
+                    for item in liinks:
+                        if '/p/' in item.get_attribute('href'):  
 
+                            self.driver.get(item.get_attribute('href'))
+                            time.sleep(7)
+                            like = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div')
+                            like.click()
+                            print(f"{self.USER.login} - {user.split('com/')[1][:-1]} - Like!", end=' ')
+                            like_users += 1
+                            t = rn(12, 40)
+                            print(f'timeout {t} seconds')
+                            time.sleep(t)
+                            break
+                    else:
+                        print(f"{self.USER.login} - {user.split('com/')[1][:-1]}  - is empty account")
+                        empty_users += 1
+                
+                except Exception as ex:
+                        print(ex)
+                        print(liinks)
+                        print(item)
+                        print(f"{self.USER.login} - {user.split('com/')[1][:-1]}  - is ERROR account")
+                        empty_users += 1
+                        continue
 
-            print(f'{littlleaurora_reels.login} liking succsessful')
-        except Exception as ex:
-            print(ex)
+                    
+                
+                
+            return all_users, like_users, empty_users
         
         
-
+        user_links = get_user_links()
+        all_users, like_users, empty_users = liking_for_list(user_links)
         
+        print(f"{self.USER.login} - \nall users - {all_users} \n all likes - {like_users} \n empty users - {empty_users} \n" )
+        time.sleep(3)
 
+        print(f'\n{self.USER.login} - liking succsessful')
+
+
+    def like_post(self, link):
+
+        self.driver.get(link)
+        time.sleep(7)
+
+        like_condition = self.driver.find_element(By.CLASS_NAME, 'x1lliihq x1n2onr6 xxk16z8')
+        print(like_condition.text)
+
+        'x1lliihq x1n2onr6 xxk16z8'
+        like = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div')
+        like.click()
+        
+        # like_condition = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div/div/span/svg/title')
+        # print(like_condition.text)
+        
+        time.sleep(450)
+  
+    
     def close(self):
 
         pickle.dump(self.driver.get_cookies(), open(f"{self.USER.login}_cookies", "wb"))
-        print(f'{littlleaurora_reels.login} COOKIE SAVED')
+        print(f'{littlleaurora_reels.login} - COOKIE SAVED')
         time.sleep(2)
         self.driver.close
         self.driver.quit
@@ -220,10 +296,22 @@ class InstaBot:
 
 if __name__ == '__main__':
     bot = InstaBot(user=littlleaurora_reels, headless=False)
-    print(f'{littlleaurora_reels.login} start')
+    print(f'{littlleaurora_reels.login} - start')
     # bot.login()
     bot.load_accaunt()
-    bot.like_by_photo('https://www.instagram.com/p/C25vb9uIH2F/?img_index=1')
+    # bot.like_post('https://www.instagram.com/p/CytLZD-Nk8J/')
+    data_start = datetime.datetime.now()
+
+    bot.like_by_photo('https://www.instagram.com/reel/C279VnQN1JV/?igsh=MWd3cGs1OTJhb2JpOA==')
+    t = rn(800, 1800)
+    print(f'-------------\ntimeout {t} seconds\n-------------')
+    time.sleep(t)
+    bot.like_by_photo('https://www.instagram.com/reel/C27cxiSyrnh/?igsh=N3Bid2w2YXd6ZDBi')
+    
+    data_end = datetime.datetime.now()
+
+    print(data_start, data_end, sep='\n')
+    
     bot.close()
     
     
