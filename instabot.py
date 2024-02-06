@@ -211,7 +211,7 @@ class InstaBot:
             all_users = len(user_links)
             like_users = []
             empty_users = []
-            
+            time_sleep_for_like = 8
             for user in user_links:
                 self.driver.get(f'{user}')
                 time.sleep(11)
@@ -221,15 +221,16 @@ class InstaBot:
                     if '/p/' in item.get_attribute('href'):  
                         db.add_users('like_users.txt', value=user, name=False)
                         self.driver.get(item.get_attribute('href'))
-                        time.sleep(7)
+                        time.sleep(time_sleep_for_like)
                         try:
                             like = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div')
                             like.click()
+
                         except Exception as ex:
                             print(ex)
-                            time.sleep(20)
-                            like = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div')
-                            like.click()
+                            time.sleep(300)
+                            time_sleep_for_like += 5
+                            break
                         print(f"{self.USER.login} - {user.split('com/')[1][:-1]} - Like!", end=' ')
                         like_users.append(user)
                         t = rn(12, 40)

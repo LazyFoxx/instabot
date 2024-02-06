@@ -68,14 +68,13 @@ def liking_for_list_users(account, count=300, shadow=True):
                 print(f'{account.login}\n -------------\ntimeout {t} seconds\n-------------')
                 time.sleep(t)
         except Exception as ex:
+            print('ERROR. trying continue')
+            print(f"{account.login} - all users - {all_users} all likes - {len(like_users)} empty users - {len(empty_users)} \n" )
             print(ex)
             bot.extra_close()
             ERRORS += 1
-            time.sleep(30)
-            bot = InstaBot(user=account, headless=shadow)
-            bot.load_accaunt()
-            chank_users, chank_like_users, chank_empty_users = bot.liking_for_list(user)
-            bot.close()
+            time.sleep(300)
+            continue
         
         all_users += chank_users
         like_users += chank_like_users
