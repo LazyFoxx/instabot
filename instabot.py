@@ -168,6 +168,9 @@ class InstaBot:
                 time.sleep(3)
         except Exception as ex:
             print(ex)
+    
+    
+        # time.sleep(120)
             
     
     def user_links_liking_by_photo(self, link_photo):
@@ -211,25 +214,28 @@ class InstaBot:
             all_users = len(user_links)
             like_users = []
             empty_users = []
-            time_sleep_for_like = 8
+            time_sleep_for_like = 5
             for user in user_links:
+                self.driver.get("https://www.instagram.com/")
+                time.sleep(6)
                 self.driver.get(f'{user}')
                 time.sleep(11)
                 
                 liinks = self.driver.find_elements(By.TAG_NAME, 'a')        
                 for item in liinks:
                     if '/p/' in item.get_attribute('href'):  
-                        db.add_users('like_users.txt', value=user, name=False)
                         self.driver.get(item.get_attribute('href'))
                         time.sleep(time_sleep_for_like)
                         try:
                             like = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div')
                             like.click()
+                            db.add_users('like_users.txt', value=user, name=False)
+                            time_sleep_for_like = 5
 
                         except Exception as ex:
-                            print(ex)
+                            print('error user try again after 5 min')
                             time.sleep(300)
-                            time_sleep_for_like += 5
+                            time_sleep_for_like = 13
                             break
                         print(f"{self.USER.login} - {user.split('com/')[1][:-1]} - Like!", end=' ')
                         like_users.append(user)
@@ -257,15 +263,10 @@ class InstaBot:
 
 
     def like_post(self, link):
-
         self.driver.get(link)
-        time.sleep(7)
+        time.sleep(15)
 
-        like_condition = self.driver.find_element(By.CLASS_NAME, 'x1lliihq x1n2onr6 xxk16z8')
-        print(like_condition.text)
-
-        'x1lliihq x1n2onr6 xxk16z8'
-        like = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div')
+        like = self.driver.find_element(By.XPATH, '//*[@id="mount_0_0_hO"]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/div[2]/div/div[1]')
         like.click()
         
         # like_condition = self.driver.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/div[1]/div[1]/span[1]/div/div/span/svg/title')

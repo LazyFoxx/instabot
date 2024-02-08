@@ -95,5 +95,6 @@ def liking_for_list_users(account, count=300, shadow=True):
 def proxy(account):
         bot = InstaBot(user=account, headless=False)
         bot.login()
-        time.sleep(400)
+        time.sleep(3600)
+        bot.close()
     

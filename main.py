@@ -6,20 +6,16 @@ import time
 def main():
     # Scripts
 
-    scripts.add_users_from_txt(account=lionsin__)
-    scripts.liking_for_list_users(account=littlleaurora, count=150)
-    time.sleep(1342)
-    scripts.liking_for_list_users(account=littlleaurora, count=150)
-    time.sleep(1111)
-    scripts.liking_for_list_users(account=littlleaurora, count=150)
-    time.sleep(976)
-    scripts.liking_for_list_users(account=littlleaurora, count=150)
-    time.sleep(996)
-    scripts.liking_for_list_users(account=littlleaurora, count=150)
-    time.sleep(1033)
-    scripts.liking_for_list_users(account=littlleaurora, count=150)
+    # scripts.add_users_from_txt(account=lionsin__, shadow=False)
+    # for i in range(4):
+    #     for i in range(6):
+    #         scripts.liking_for_list_users(account=littlleaurora, count=100, shadow=False)
+    #         time.sleep(700)
+    #     time.sleep(10000)
 
+
+    
+    scripts.proxy(littlleaurora)
 if __name__ == '__main__':
     main()
-
 
